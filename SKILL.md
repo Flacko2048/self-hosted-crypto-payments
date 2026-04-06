@@ -13,6 +13,14 @@ allowed-tools:
   - Edit
   - Glob
   - Grep
+env:
+  required:
+    - name: CRYPTO_MASTER_MNEMONIC
+      description: "BIP39 mnemonic (12-24 words). Master key for HD wallet derivation. Server-only — never expose to client."
+      sensitive: true
+    - name: CRON_SECRET
+      description: "32-char hex string. Protects /api/cron/check-crypto-payments from unauthorized calls."
+      sensitive: true
 ---
 
 # Self-Hosted Crypto Payments
@@ -54,7 +62,8 @@ All template files are in `resources/`. Copy them into your project at these pat
 ### 1. Install dependencies
 
 ```bash
-npm install ethers @scure/bip32 @scure/bip39 @scure/base @noble/hashes @solana/web3.js
+npm install ethers @scure/bip32 @scure/bip39 @scure/base @noble/hashes @solana/web3.js qrcode
+npm install -D @types/qrcode
 ```
 
 ### 2. Run database migrations

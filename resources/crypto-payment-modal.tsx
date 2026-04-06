@@ -204,9 +204,15 @@ export function CryptoPaymentModal({ target, onClose }: CryptoPaymentModalProps)
     onClose()
   }
 
-  const qrUrl = address
-    ? `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(address)}&size=200x200&margin=10`
-    : null
+  const [qrDataUrl, setQrDataUrl] = useState<string | null>(null)
+  useEffect(() => {
+    if (!address) { setQrDataUrl(null); return }
+    import('qrcode').then(QRCode => {
+      QRCode.toDataURL(address, { width: 200, margin: 1, color: { dark: '#000000', light: '#ffffff' } })
+        .then(url => setQrDataUrl(url))
+        .catch(() => setQrDataUrl(null))
+    })
+  }, [address])
 
   const isQuickPick = QUICK_PICKS.some(q => q.id === selectedCoin) && expandedChain === null
 
@@ -326,10 +332,10 @@ export function CryptoPaymentModal({ target, onClose }: CryptoPaymentModalProps)
                 </div>
               )}
 
-              {qrUrl && (
+              {qrDataUrl && (
                 <div className="flex justify-center mb-4">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={qrUrl} alt="Payment QR code" width={200} height={200} className="rounded-lg border" />
+                  <img src={qrDataUrl} alt="Payment QR code" width={200} height={200} className="rounded-lg border" />
                 </div>
               )}
 

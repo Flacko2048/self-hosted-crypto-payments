@@ -69,6 +69,31 @@ Claude will copy the files, wire up the modal, and configure the cron job for yo
 - Cron endpoint protected with `timingSafeEqual(CRON_SECRET)`
 - Payments confirmed against real blockchain data — not forgeable webhooks
 - Supabase RLS: users can only read their own payment records
+- **QR codes generated client-side** using `qrcode` — payment addresses are never transmitted to any external service
+
+## Security Advisory
+
+### Master mnemonic is a single point of control
+
+`CRYPTO_MASTER_MNEMONIC` controls all derived deposit wallets across every chain. Treat it with the same care as a private key.
+
+**Recommended mitigations:**
+- Store it in your hosting provider's secrets manager (Vercel Environment Variables, AWS Secrets Manager, etc.) — not in `.env` files committed to git
+- Keep an offline backup (written on paper, stored securely)
+- To sweep received funds: import the mnemonic into MetaMask (EVM chains), Phantom (Solana), or any BIP84 wallet (Bitcoin) — accounts correspond to derivation indices
+
+### External network calls
+
+This skill makes the following outbound calls. All receive **only public blockchain data** — no user identity, no secrets, no mnemonic-derived material is ever transmitted:
+
+| Service | Purpose | Data sent |
+|---|---|---|
+| `api.coingecko.com` | Native token exchange rates | Coin ID (e.g. "ethereum") |
+| `mempool.space/api` | Bitcoin balance check | Bitcoin address (public) |
+| Public EVM RPCs (Cloudflare, Base, etc.) | EVM/token balance check | Wallet address (public) |
+| `api.mainnet-beta.solana.com` | Solana balance check | Wallet address (public) |
+
+No third-party QR service is used — QR codes are generated locally in the browser.
 
 ## Requirements
 
